@@ -42,8 +42,10 @@ def draw_display(dispsize, imagefile=None):
         # width and height of the image
         w, h = len(img[0]), len(img)
         # x and y position of the image on the display
-        x = dispsize[0] / 2 - w / 2
-        y = dispsize[1] / 2 - h / 2
+        #x = dispsize[0] / 2 - w / 2
+        #y = dispsize[1] / 2 - h / 2
+        x = dispsize[0] // 2 - w // 2
+        y = dispsize[1] // 2 - h // 2
         # draw the image on the screen
         screen[y:y + h, x:x + w, :] += img
     # dots per inch
@@ -80,8 +82,10 @@ def gaussian(x, sx, y=None, sy=None):
     if sy == None:
         sy = sx
     # centers
-    xo = x / 2
-    yo = y / 2
+    #xo = x / 2
+    #yo = y / 2
+    xo = x / 2.0
+    yo = y / 2.0
     # matrix of zeros
     M = numpy.zeros([y, x], dtype=float)
     # gaussian matrix
@@ -132,8 +136,10 @@ def draw_heatmap(gazepoints, dispsize, imagefile=None, alpha=0.5, savefilename=N
     gsdwh = gwh / 6 if (gaussiansd is None) else gaussiansd
     gaus = gaussian(gwh, gsdwh)
     # matrix of zeroes
-    strt = gwh / 2
-    heatmapsize = dispsize[1] + 2 * strt, dispsize[0] + 2 * strt
+    #strt = gwh / 2
+    #heatmapsize = dispsize[1] + 2 * strt, dispsize[0] + 2 * strt
+    strt = gwh // 2
+    heatmapsize = (dispsize[1] + 2 * strt, dispsize[0] + 2 * strt)
     heatmap = numpy.zeros(heatmapsize, dtype=float)
     # create heatmap
     for i in range(0, len(gazepoints)):
@@ -168,7 +174,8 @@ def draw_heatmap(gazepoints, dispsize, imagefile=None, alpha=0.5, savefilename=N
     heatmap = heatmap[strt:dispsize[1] + strt, strt:dispsize[0] + strt]
     # remove zeros
     lowbound = numpy.mean(heatmap[heatmap > 0])
-    heatmap[heatmap < lowbound] = numpy.NaN
+   # heatmap[heatmap < lowbound] = numpy.NaN
+    heatmap[heatmap < lowbound] = numpy.nan
     # draw heatmap on top of image
     ax.imshow(heatmap, cmap='jet', alpha=alpha)
 
@@ -214,16 +221,40 @@ background_image = args['background_image']
 ngaussian = args['n_gaussian_matrix']
 sd = args['standard_deviation']
 
-with open(input_path) as f:
-	reader = csv.reader(f)
-	raw = list(reader)
+#with open(input_path) as f:
+#	reader = csv.reader(f)
+#	raw = list(reader)
 	
-	gaza_data = []
-	if len(raw[0]) is 2:
-		gaze_data = list(map(lambda q: (int(q[0]), int(q[1]), 1), raw))
-	else:
-		gaze_data =  list(map(lambda q: (int(q[0]), int(q[1]), int(q[2])), raw))
+	#gaza_data = []
+ #   gaze_data = []
+	#if len(raw[0]) is 2:
+	#	gaze_data = list(map(lambda q: (int(q[0]), int(q[1]), 1), raw))
+  #  if len(raw[0]) == 2:
+	#	gaze_data = list(map(lambda q: (int(q[0]), int(q[1]), 1), raw))
+	#else:
+	#	gaze_data =  list(map(lambda q: (int(q[0]), int(q[1]), int(q[2])), raw))
 		
-	draw_heatmap(gaze_data, (display_width, display_height), alpha=alpha, savefilename=output_name, imagefile=background_image, gaussianwh=ngaussian, gaussiansd=sd)
+	#draw_heatmap(gaze_data, (display_width, display_height), alpha=alpha, savefilename=output_name, imagefile=background_image, gaussianwh=ngaussian, gaussiansd=sd)
+
+with open(input_path, newline='') as f:
+    reader = csv.reader(f)
+    raw = list(reader)
+
+gaze_data = []
+
+if len(raw[0]) == 2:
+    gaze_data = list(map(lambda q: (int(q[0]), int(q[1]), 1), raw))
+else:
+    gaze_data = list(map(lambda q: (int(q[0]), int(q[1]), int(q[2])), raw))
+
+draw_heatmap(
+    gaze_data,
+    (display_width, display_height),
+    alpha=alpha,
+    savefilename=output_name,
+    imagefile=background_image,
+    gaussianwh=ngaussian,
+    gaussiansd=sd
+)
 
    
